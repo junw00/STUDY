@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<style>
+    body, html{
+        margin: 0;
+        height: 100%;
+        display: flex;
+        width: 100%;
+    }
+    .home-container, .home-wrap {
+        display: flex;
+        box-sizing: border-box;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .home-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px;
+    }
+    .home-right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        padding-right: 15px;
+    }
+    a {
+        text-decoration: none;
+        color: black;
+    }
+
+    .logout {
+        cursor: pointer;
+    }
+    .home-body {
+        padding: 25px;
+    }
+
+    .book-wrap {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 3개의 열을 동일한 너비로 설정 */
+        gap: 20px; /* 열과 열 사이의 간격 설정 */
+        padding: 20px; /* 그리드 내부의 여백 설정 */
+    }
+
+    .book-body {
+        width: 70%;
+        border: 1px solid #dbdbdb;
+        padding: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+        cursor: pointer;
+    }
+
+    .book-body:hover {
+        transform: scale(1.05); /* 5% 확대 */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    }
+
+    .book-info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .book-img img{
+        width: 100%;
+    }
+
+    .book-name {
+        font-size: 12px;
+    }
+
+    .book-price {
+        font-size: 13px;
+        display: flex;
+        justify-content: end;
+        align-items: end;
+    }
+</style>
+<body>
+    <div class="home-container">
+        <div class="home-wrap">
+            <div class="home-header">
+                <div class="home-logo">
+                    <h1><a href="/">BOOK</a></h1>
+                </div>
+                <div class="home-right" th:if="${userInfo == null}">
+                    <span><a href="/member">로그인</a></span>
+                    <span><a href="/member/new">회원가입</a></span>
+                </div>
+                <div class="home-right" th:if="${userInfo != null}">
+                    <span th:text="${userInfo.name} + ' 님'"></span>
+                    <span th:onclick="'logout()'" class="logout">로그아웃</span>
+                    <span><a href="/cart">장바구니</a></span>
+                </div>
+            </div>
+            <div class="home-body">
+                <div class="book-wrap">
+                    <div class="book-body" th:each="book : ${books}" th:onclick="'move(' + ${book.bookId} + ')'">
+                        <div class="book-img" >
+                            <img th:src="@{${book.imagePath}}" alt="">
+                        </div>
+                        <div class="book-info">
+                            <span class="book-name" th:text="${book.bookName}"></span>
+                            <span class="book-price" th:text="'가격: ' + ${book.price} + '원'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logout = () => {
+            axios.post("/logout")
+                .then((response) => {
+                    if(response.status === 200) {
+                        location.href = "http://localhost:8080"
+                    }
+                }).catch((error) => {
+                    console.log(error)
+            })
+        };
+
+        const move = (bookId) => {
+            axios.get(`book/${bookId}`)
+                .then((response) => {
+                    console.log(response);
+                    location.href=`http://localhost:8080/book/${bookId}`
+                }).catch((error) => {
+                    console.log(err);
+            })
+        }
+    </script>
+</body>
+</html>

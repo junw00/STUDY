@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<form action="/address" method="post">
+  <div><input type="text" name="postalCode" placeholder="우편번호"></div>
+  <div><input type="text" name="basicAddress"  placeholder="기본주소"></div>
+  <div><input type="text" name="detailAddress" placeholder="상세주소"></div>
+  <button type="submit">등록</button>
+</form>
+</body>
+
+</html>

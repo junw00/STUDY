@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    body, html{
+        margin: 0;
+        height: 100%;
+        display: flex;
+        width: 100%;
+    }
+    .home-container, .home-wrap {
+        display: flex;
+        box-sizing: border-box;
+        flex-direction: column;
+        /*justify-content: center;*/
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .home-header {
+        display: flex;
+        justify-content: space-between;
+
+        width: 90%;
+        padding: 20px;
+    }
+    .home-right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        padding-right: 15px;
+
+    }
+    a {
+        text-decoration: none;
+        color: black;
+    }
+
+    .logout {
+        cursor: pointer;
+    }
+
+    .cartItem-body-container {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-left: 25px;
+        margin-right: 25px;
+    }
+
+    .cartItem-body-wrap {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        margin-left: 50px;
+    }
+
+    .cartItem-body {
+        display: flex;
+        padding-right: 30px;
+    }
+
+    .cartItem-title {
+        margin-bottom: 120px;
+    }
+
+    .cartItem-price-info {
+        display: flex;
+    }
+
+    .price-wrap {
+        display: flex;
+        flex-direction: column;
+        margin-right: 35px;
+    }
+
+    .order-btn {
+        width: 100%;
+    }
+
+    .cartItem-info-wrap {
+        display: flex;
+        flex-direction: column;
+    }
+    input {
+        width: 35px;
+        border: none;
+        outline: none;
+    }
+
+    .up, .down {
+        cursor: pointer;
+        border: 1px solid #dbdbdb;
+    }
+
+    .upDown {
+        border-top: 1px solid #dbdbdb;
+        border-bottom: 1px solid #dbdbdb;
+
+        margin-right: 200px;
+    }
+    select {
+        width: 100px;
+    }
+
+</style>
+<body>
+    <div class="home-container">
+        <div class="home-wrap">
+            <div class="home-header">
+                <div class="home-logo">
+                    <h1><a href="/">BOOK</a></h1>
+                </div>
+                <div class="home-right" th:if="${userInfo == null}">
+                    <span><a href="/member">로그인</a></span>
+                    <span><a href="/member/new">회원가입</a></span>
+                </div>
+                <div class="home-right" th:if="${userInfo != null}">
+                    <span th:text="${userInfo.name} + ' 님'"></span>
+                    <span th:onclick="'logout()'" class="logout">로그아웃</span>
+                    <span><a href="/cart">장바구니</a></span>
+                </div>
+            </div>
+            <div class="cartItem-body-container">
+                <div class="cartItem-body-wrap">
+                    <div class="cartItem-body" th:each="cartItem : ${cartItems}">
+                        <div class="cartItem-img">
+                            <img th:src="${cartItem.imagePath}" alt="">
+                        </div>
+                        <div class="cartItem-info-wrap">
+                            <div class="cartItem-title">
+                                <h3 th:text="${cartItem.bookName}"></h3>
+                            </div>
+                            <div class="cartItem-price-info">
+                                <div class="upDown">
+                                    <span class="down" th:onclick="'down('+ ${cartItem.cartId} + ',' + ${cartItem.bookId} + ','+ ${cartItem.quantity} + ')'">∨</span>
+                                    <input type="text" th:value="${cartItem.quantity}"/>
+                                    <span class="up" th:onclick="'up('+ ${cartItem.cartId} + ',' + ${cartItem.bookId} + ','+ ${cartItem.quantity} + ')'">∧</span>
+
+                                </div>
+                                <span th:text="'가격: ' +  ${cartItem.price * cartItem.quantity}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="price-wrap">
+                    <div>
+                        <h3>주문 금액</h3>
+                        <span th:text="'총 가격: ' + ${totalPrice}"></span>
+                        <div >
+                            <select id="cardNum">
+                                <option th:text="${card.cardNum}" th:each="card : ${cards}"></option>
+                            </select>
+                            <select id="company">
+                                <option th:text="${card.company}" th:each="card : ${cards}"></option>
+                            </select>
+                            <button onclick="location.href='http://localhost:8080/card'">카드 등록하기</button>
+                        </div>
+                        <div >
+                            <select id="basicAddress" >
+
+                                <option th:text="${address.basicAddress}" th:each="address : ${address}"></option>
+                            </select>
+                            <select id="detailAddress" >
+                                <option th:text="${address.detailAddress}" th:each="address : ${address}"></option>
+                            </select>
+                            <select id="postalCode" >
+                                <option th:text="${address.postalCode}" th:each="address : ${address}"></option>
+                            </select>
+                            <button onclick="location.href='http://localhost:8080/address'">주소 등록하기</button>
+                        </div>
+
+                        <button class="order-btn" th:onclick="'order('+${totalPrice}+')'">주문</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+
+
+        const order = (totalPrice) => {
+            const cardNum = document.getElementById("cardNum").value;
+            const company = document.getElementById("company").value;
+            const basicAddress = document.getElementById("basicAddress").value;
+            const detailAddress = document.getElementById("detailAddress").value;
+            const postalCode = document.getElementById("postalCode").value;
+            axios.post("/order", {
+                cardNum: cardNum,
+                cardCompany: company,
+                basicAddress: basicAddress,
+                detailAddress: detailAddress,
+                postalCode: postalCode,
+                price: totalPrice,
+                cardValid: '21332',
+
+            }).then((response) => {
+                console.log(response)
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+
+        const logout = () => {
+            axios.post("/logout")
+                .then((response) => {
+                    if(response.status === 200) {
+                        location.href = "http://localhost:8080"
+                    }
+                }).catch((error) => {
+                console.log(error)
+            })
+        };
+
+        const up = (cart_id, book_id, quantity) => {
+            if(quantity <= 0) {
+                return;
+            }
+            axios.post("/cartItem/update", {
+                cartId: cart_id,
+                bookId: book_id,
+                quantity: quantity + 1,
+            }).then((response) => {
+                console.log(response)
+                location.href="http://localhost:8080/cart"
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+
+        const down = (cart_id, book_id, quantity) => {
+            if(quantity <= 1) {
+                return;
+            }
+            axios.post("/cartItem/update", {
+                cartId: cart_id,
+                bookId: book_id,
+                quantity: quantity - 1,
+            }).then((response) => {
+                console.log(response)
+                location.href="http://localhost:8080/cart"
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+    </script>
+</body>
+</html>

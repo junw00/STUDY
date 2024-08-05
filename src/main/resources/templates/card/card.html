@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<form action="/card" method="post">
+  <div><input type="text" name="cardNum" placeholder="카드번호 입력"></div>
+  <div><input type="text" name="valid"  placeholder="카드 유효기간"></div>
+  <div><input type="text" name="company" placeholder="카드회사 입력"></div>
+  <button type="submit">등록</button>
+</form>
+</body>
+
+</html>
