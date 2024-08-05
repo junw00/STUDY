@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>  
+    <div>우편번호: <input type="text"></div>
+    <div>주소지 입력: <input type="text"></div>
+    <div>상세 주소: <input type="text"></div>
+    <div>카드번호 입력: <input type="text"></div>
+    <div>가격</div>
+    <button>결제</button>
+
+    <script>
+
+        const logout = () => {
+            axios.post("/logout")
+                .then((response) => {
+                    if(response.status === 200) {
+                        location.href = "http://localhost:8080"
+                    }
+                }).catch((error) => {
+                console.log(error)
+            })
+        };
+
+        const addCart = (bookId) => {
+            const quantity = document.getElementById("quantity").value;
+            console.log(quantity);
+            axios.post("/cartItem", {
+                bookId: bookId,
+                quantity: quantity
+            }).then((response) => {
+                if(response.status == 404) {
+                    location.href = "http://localhost:8080/member";
+                }
+            }).catch((error) => {
+                if(error.response.status == 404) {
+                    location.href = "http://localhost:8080/member";
+                }
+            })
+        }
+    </script>
+</body>
+</html>

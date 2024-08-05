@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    body, html{
+        margin: 0;
+        height: 100%;
+        display: flex;
+        width: 100%;
+    }
+    .home-container, .home-wrap {
+        display: flex;
+        box-sizing: border-box;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .home-header {
+        display: flex;
+        justify-content: space-between;
+
+        width: 90%;
+        padding: 20px;
+    }
+    .home-right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        padding-right: 15px;
+
+    }
+    a {
+        text-decoration: none;
+        color: black;
+    }
+
+    .logout {
+        cursor: pointer;
+    }
+    .home-body {
+        padding: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 60%;
+        box-sizing: border-box;
+    }
+
+    .book-wrap {
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 10px;
+        width: 40%;
+        box-sizing: border-box;
+    }
+
+    .book-body {
+        width: 100%;
+        border: 1px solid #dbdbdb;
+        padding: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+    }
+
+    .book-info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .book-img img{
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .book-name {
+        font-size: 12px;
+    }
+
+    .book-price {
+        font-size: 13px;
+        display: flex;
+        justify-content: end;
+        align-items: end;
+    }
+
+    input {
+        box-sizing: border-box;
+        width: 40%;
+        border: 1px solid #dbdbdb;
+        outline: none;
+        height: 90%;
+    }
+    .btns {
+        width: 100%;
+        height: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+</style>
+<div class="home-container">
+    <div class="home-wrap">
+        <div class="home-header">
+            <div class="home-logo">
+                <h1><a href="/">BOOK</a></h1>
+            </div>
+            <div class="home-right" th:if="${userInfo == null}">
+                <span><a href="/member">로그인</a></span>
+                <span><a href="/member/new">회원가입</a></span>
+            </div>
+            <div class="home-right" th:if="${userInfo != null}">
+                <span th:text="${userInfo.name} + ' 님'"></span>
+                <span th:onclick="'logout()'" class="logout">로그아웃</span>
+                <span><a href="">장바구니</a></span>
+            </div>
+        </div>
+        <div class="home-body">
+            <div class="book-wrap">
+                <div class="book-body">
+                    <div class="book-img" >
+                        <img th:src="@{${book.imagePath}}" alt="">
+                    </div>
+                    <div class="book-info">
+                        <span class="book-name" th:text="${book.bookName}"></span>
+                        <span class="book-price" th:text="'가격: ' + ${book.price} + '원'"></span>
+                    </div>
+                </div>
+
+                <div class="btns">
+                    <input type="number" id="quantity" value="1" min="1" step="1" th:max="${book.stock}">
+                    <button th:onclick="'addCart(' + ${book.bookId} + ')'">장바구니</button>
+                    <button>구매</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    const logout = () => {
+        axios.post("/logout")
+            .then((response) => {
+                if(response.status === 200) {
+                    location.href = "http://localhost:8080"
+                }
+            }).catch((error) => {
+            console.log(error)
+        })
+    };
+
+    const addCart = (bookId) => {
+        const quantity = document.getElementById("quantity").value;
+        console.log(quantity);
+        axios.post("/cartItem", {
+            bookId: bookId,
+            quantity: quantity
+        }).then((response) => {
+            if(response.status == 404) {
+                location.href = "http://localhost:8080/member";
+            }
+        }).catch((error) => {
+            if(error.response.status == 404) {
+                location.href = "http://localhost:8080/member";
+            }
+        })
+    }
+</script>
+</body>
+</html>
